@@ -56,6 +56,9 @@ typedef enum {
     ModulePhase_ProcessDeltaY,
     ModulePhase_ProcessDeltaX,
     ModulePhase_ProcessSqual,
+    ModulePhase_ProcessShutterLower,
+    ModulePhase_ProcessShutterUpper,
+	ModulePhase_ProcessPixelGrab
 } module_phase_t;
 
 module_phase_t modulePhase = ModulePhase_SetResolution;
@@ -66,6 +69,8 @@ uint8_t txBufferGetMotion[] = {0x02, 0x00};
 uint8_t txBufferGetDeltaY[] = {0x03, 0x00};
 uint8_t txBufferGetDeltaX[] = {0x04, 0x00};
 uint8_t txBufferGetSQUAL[] = {0x05, 0x00};
+uint8_t txBufferGetShutterLower[] = {0x06, 0x00};
+uint8_t txBufferGetShutterUpper[] = {0x07, 0x00};
 
 
 
@@ -80,6 +85,13 @@ void tx(uint8_t *txBuff)
     xfer.txData = txBuff;
     SPI_MasterTransferNonBlocking(TRACKBALL_SPI_MASTER, &handle, &xfer);
 }
+/*
+uint8_t pixelRegionBuffer =
+uint8_t pixelRegionIdx = 0;
+uint16_t pixelIdxInRegion = 0;
+const uint8_t pixelCountPerRegion = 22;
+const uint16_t pixelCount;
+*/
 
 void trackballUpdate(SPI_Type *base, spi_master_handle_t *masterHandle, status_t status, void *userData)
 {
@@ -115,11 +127,32 @@ void trackballUpdate(SPI_Type *base, spi_master_handle_t *masterHandle, status_t
             modulePhase = ModulePhase_ProcessSqual;
             break;
         case ModulePhase_ProcessSqual: ;
-            uint8_t squal = (int8_t)rxBuffer[1];
+            uint8_t squal = (uint8_t)rxBuffer[1];
             PointerDelta.squal = squal;
+            tx(txBufferGetShutterUpper);
+            modulePhase = ModulePhase_ProcessShutterUpper;
+            break;
+        case ModulePhase_ProcessShutterUpper: ;
+			uint16_t shutterUpper = (uint8_t)rxBuffer[1];
+			PointerDelta.shutter = (PointerDelta.shutter & 0x00FF) + (shutterUpper * 256`);
+            tx(txBufferGetShutterLower);
+            modulePhase = ModulePhase_ProcessShutterLower;
+            break;
+        case ModulePhase_ProcessShutterLower: ;
+			uint16_t shutterLower = (uint8_t)rxBuffer[1];
+			PointerDelta.shutter = (PointerDelta.shutter & 0xFF00) + shutterLower;
+            tx(txBufferGetMotion);
+            modulePhase = ModulePhase_ProcessMotion;
+/*
+            //modulePhase = ModulePhase_ProcessPixelGrab;
+            break;
+        case ModulePhase_ProcessPixelGrab: ;
+        	uint8_t val = (uint8_t)rxBuffer[1];
+        	PointerDelta.shutter = (PointerDelta.shutter & 0x00FF) + (shutterUpper << 8);
             tx(txBufferGetMotion);
             modulePhase = ModulePhase_ProcessMotion;
             break;
+            */
     }
 }
 

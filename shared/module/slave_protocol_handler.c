@@ -102,6 +102,7 @@ void SlaveTxHandler(void)
                 pointerDelta->x = PointerDelta.x;
                 pointerDelta->y = PointerDelta.y;
                 pointerDelta->squal = PointerDelta.squal;
+                pointerDelta->shutter = PointerDelta.shutter;
                 PointerDelta.x = 0;
                 PointerDelta.y = 0;
                 messageLength += sizeof(pointer_delta_t);

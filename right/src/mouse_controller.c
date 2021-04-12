@@ -313,6 +313,9 @@ void MouseController_ProcessMouseActions()
 
         if(moduleState->moduleId == ModuleId_TrackballRight){
             WATCH_VALUE(moduleState->pointerDelta.squal, 0);
+            WATCH_VALUE(moduleState->pointerDelta.shutter, 1);
+            WATCH_VALUE((moduleState->pointerDelta.shutter & 0xFF00) /256, 2);
+            WATCH_VALUE((moduleState->pointerDelta.shutter & 0x00FF), 3);
         }
 
         processModuleActions(moduleState->moduleId, (int16_t)moduleState->pointerDelta.x, (int16_t)moduleState->pointerDelta.y);
