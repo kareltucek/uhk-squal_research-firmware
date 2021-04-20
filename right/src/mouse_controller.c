@@ -237,7 +237,7 @@ void processModuleActions(uint8_t moduleId, float x, float y) {
     module_configuration_t *moduleConfiguration = GetModuleConfiguration(moduleId);
     navigation_mode_t navigationMode = moduleConfiguration->navigationModes[ActiveLayer];
     int16_t yInversion = moduleId == ModuleId_KeyClusterLeft ||  moduleId == ModuleId_TouchpadRight ? -1 : 1;
-    int8_t scrollSpeedDivisor = 8;
+    int8_t scrollSpeedDivisor = 50;
     float speed = computeModuleSpeed(x, y, moduleId);
 
     static float xFractionRemainder = 0.0f;
@@ -313,9 +313,10 @@ void MouseController_ProcessMouseActions()
 
         if(moduleState->moduleId == ModuleId_TrackballRight){
             WATCH_VALUE(moduleState->pointerDelta.squal, 0);
-            WATCH_VALUE(moduleState->pointerDelta.shutter, 1);
-            WATCH_VALUE((moduleState->pointerDelta.shutter & 0xFF00) /256, 2);
-            WATCH_VALUE((moduleState->pointerDelta.shutter & 0x00FF), 3);
+            WATCH_VALUE_MIN(moduleState->pointerDelta.squal, 1);
+            WATCH_VALUE(moduleState->pointerDelta.shutter, 2);
+            WATCH_VALUE((int)moduleState->pointerDelta.squal * 1000 / moduleState->pointerDelta.shutter, 3);
+
         }
 
         processModuleActions(moduleState->moduleId, (int16_t)moduleState->pointerDelta.x, (int16_t)moduleState->pointerDelta.y);
