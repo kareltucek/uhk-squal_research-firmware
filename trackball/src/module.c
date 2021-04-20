@@ -69,8 +69,8 @@ uint8_t txBufferGetMotion[] = {0x02, 0x00};
 uint8_t txBufferGetDeltaY[] = {0x03, 0x00};
 uint8_t txBufferGetDeltaX[] = {0x04, 0x00};
 uint8_t txBufferGetSQUAL[] = {0x05, 0x00};
-uint8_t txBufferGetShutterLower[] = {0x06, 0x00};
-uint8_t txBufferGetShutterUpper[] = {0x07, 0x00};
+uint8_t txBufferGetShutterUpper[] = {0x06, 0x00};
+uint8_t txBufferGetShutterLower[] = {0x07, 0x00};
 
 
 
@@ -134,7 +134,7 @@ void trackballUpdate(SPI_Type *base, spi_master_handle_t *masterHandle, status_t
             break;
         case ModulePhase_ProcessShutterUpper: ;
 			uint16_t shutterUpper = (uint8_t)rxBuffer[1];
-			PointerDelta.shutter = (PointerDelta.shutter & 0x00FF) + (shutterUpper * 256`);
+			PointerDelta.shutter = (PointerDelta.shutter & 0x00FF) + (shutterUpper * 256);
             tx(txBufferGetShutterLower);
             modulePhase = ModulePhase_ProcessShutterLower;
             break;
