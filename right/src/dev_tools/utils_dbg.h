@@ -25,6 +25,12 @@
 // Watches value V in slot N.
 #define WATCH_VALUE(V, N) if(CurrentWatch == N) { WatchValue(V, N); }
 
+// Watches value V in slot N.
+#define WATCH_VALUE_MIN(V, N) if(CurrentWatch == N) { WatchValueMin(V, N); }
+
+// Watches value V in slot N.
+#define WATCH_VALUE_MAX(V, N) if(CurrentWatch == N) { WatchValueMax(V, N); }
+
 // Watches string V in slot N.
 #define WATCH_STRING(V, N) if(CurrentWatch == N) { WatchString(V, N); }
 
@@ -43,5 +49,7 @@ void ShowNumberMag(int a);
 #define WATCH_TRIGGER(N)
 #define WATCH_TIME(N)
 #define WATCH_VALUE(V, N)
+#define WATCH_VALUE_MIN(V, N)
+#define WATCH_VALUE_MAX(V, N)
 
 #endif

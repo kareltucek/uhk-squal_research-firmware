@@ -5,6 +5,8 @@
 #include "led_display.h"
 #include "timer.h"
 #include "key_states.h"
+#include <limits.h>
+
 
 uint8_t CurrentWatch = 0;
 
@@ -37,6 +39,36 @@ void WatchValue(int v, uint8_t n)
     if(CurrentTime - lastWatch > watchInterval) {
         ShowNumberMag(v);
         lastWatch = CurrentTime;
+    }
+}
+
+void WatchValueMin(int v, uint8_t n)
+{
+    static int m = 0;
+
+    if(v < m) {
+        m = v;
+    }
+
+    if(CurrentTime - lastWatch > watchInterval) {
+        ShowNumberMag(m);
+        lastWatch = CurrentTime;
+        m = INT_MAX;
+    }
+}
+
+void WatchValueMax(int v, uint8_t n)
+{
+    static int m = 0;
+
+    if(v > m) {
+        m = v;
+    }
+
+    if(CurrentTime - lastWatch > watchInterval) {
+        ShowNumberMag(m);
+        lastWatch = CurrentTime;
+        m = INT_MIN;
     }
 }
 
