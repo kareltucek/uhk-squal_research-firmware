@@ -39,6 +39,8 @@ extern uint8_t CurrentWatch;
 void TriggerWatch(key_state_t *keyState);
 void WatchTime(uint8_t n);
 void WatchValue(int v, uint8_t n);
+void WatchValueMin(int v, uint8_t n);
+void WatchValueMax(int v, uint8_t n);
 void WatchString(char const * v, uint8_t n);
 void ShowNumberMag(int a);
 
