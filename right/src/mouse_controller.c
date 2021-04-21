@@ -316,7 +316,7 @@ void MouseController_ProcessMouseActions()
             WATCH_VALUE_MIN(moduleState->pointerDelta.squal, 1);
             WATCH_VALUE(moduleState->pointerDelta.shutter, 2);
             WATCH_VALUE((int)moduleState->pointerDelta.squal * 1000 / moduleState->pointerDelta.shutter, 3);
-
+            WATCH_VALUE_MAX(moduleState->pointerDelta.maxY, 4);
         }
 
         processModuleActions(moduleState->moduleId, (int16_t)moduleState->pointerDelta.x, (int16_t)moduleState->pointerDelta.y);

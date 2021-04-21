@@ -61,6 +61,7 @@
         int16_t y;
         uint8_t squal;
         uint16_t shutter;
+        uint8_t maxY;
     } ATTR_PACKED pointer_delta_t;
 
 // Variables:

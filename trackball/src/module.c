@@ -117,6 +117,7 @@ void trackballUpdate(SPI_Type *base, spi_master_handle_t *masterHandle, status_t
         case ModulePhase_ProcessDeltaY: ;
             int8_t deltaY = (int8_t)rxBuffer[1];
             PointerDelta.x += deltaY; // This is correct given the sensor orientation.
+            PointerDelta.maxY = deltaY > PointerDelta.maxY ? deltaY : PointerDelta.maxY;
             tx(txBufferGetDeltaX);
             modulePhase = ModulePhase_ProcessDeltaX;
             break;
