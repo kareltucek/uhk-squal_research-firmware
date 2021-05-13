@@ -2,6 +2,7 @@
 #include "fsl_port.h"
 #include "fsl_spi.h"
 #include "module.h"
+#include "slave_protocol.h"
 
 #define TRACKBALL_SHTDWN_PORT PORTA
 #define TRACKBALL_SHTDWN_GPIO GPIOA
@@ -48,6 +49,8 @@ key_vector_t keyVector = {
 
 #define BUFFER_SIZE 2
 #define MOTION_BIT (1<<7)
+#define PIXRDY_BIT (1<<6)
+#define PIXFST_BIT (1<<5)
 
 typedef enum {
     ModulePhase_SetResolution,
@@ -58,7 +61,7 @@ typedef enum {
     ModulePhase_ProcessSqual,
     ModulePhase_ProcessShutterLower,
     ModulePhase_ProcessShutterUpper,
-	ModulePhase_ProcessPixelGrab
+	ModulePhase_ProcessPixgrab
 } module_phase_t;
 
 module_phase_t modulePhase = ModulePhase_SetResolution;
@@ -71,12 +74,16 @@ uint8_t txBufferGetDeltaX[] = {0x04, 0x00};
 uint8_t txBufferGetSQUAL[] = {0x05, 0x00};
 uint8_t txBufferGetShutterUpper[] = {0x06, 0x00};
 uint8_t txBufferGetShutterLower[] = {0x07, 0x00};
+uint8_t txBufferGetPixel[] = {0x0b, 0x00};
+uint8_t txBufferInitPixgrab[] = {0x0b, 0x01};
 
 
 
 uint8_t rxBuffer[BUFFER_SIZE];
 spi_master_handle_t handle;
 spi_transfer_t xfer = {0};
+
+bool takeSqual = true;
 
 void tx(uint8_t *txBuff)
 {
@@ -85,13 +92,28 @@ void tx(uint8_t *txBuff)
     xfer.txData = txBuff;
     SPI_MasterTransferNonBlocking(TRACKBALL_SPI_MASTER, &handle, &xfer);
 }
-/*
-uint8_t pixelRegionBuffer =
-uint8_t pixelRegionIdx = 0;
-uint16_t pixelIdxInRegion = 0;
-const uint8_t pixelCountPerRegion = 22;
-const uint16_t pixelCount;
-*/
+
+static uint8_t motion = 0;
+
+static void schedulePixgrabMaybe(bool allowPixgrab) {
+
+    if(allowPixgrab && PG_enabled && (motion & PIXRDY_BIT) && PG_inRegionIdx < PG_REGION_SIZE) {
+        tx(txBufferGetPixel);
+        modulePhase = ModulePhase_ProcessPixgrab;
+    } else {
+        tx(txBufferGetMotion);
+        modulePhase = ModulePhase_ProcessMotion;
+    }
+}
+
+static void processPixgrab() {
+    if(motion & PIXFST_BIT) {
+        PG_inRegionIdx = 0;
+        PG_regionIdx = 0;
+    }
+    PG_regionBuffer[PG_inRegionIdx] = (uint8_t)rxBuffer[1];
+    PG_inRegionIdx++;
+}
 
 void trackballUpdate(SPI_Type *base, spi_master_handle_t *masterHandle, status_t status, void *userData)
 {
@@ -105,13 +127,13 @@ void trackballUpdate(SPI_Type *base, spi_master_handle_t *masterHandle, status_t
             modulePhase = ModulePhase_ProcessMotion;
             break;
         case ModulePhase_ProcessMotion: ;
-            uint8_t motion = rxBuffer[1];
+            motion = rxBuffer[1];
             bool isMoved = motion & MOTION_BIT;
             if (isMoved) {
                 tx(txBufferGetDeltaY);
                 modulePhase = ModulePhase_ProcessDeltaY;
             } else {
-                tx(txBufferGetMotion);
+                schedulePixgrabMaybe(true);
             }
             break;
         case ModulePhase_ProcessDeltaY: ;
@@ -124,8 +146,12 @@ void trackballUpdate(SPI_Type *base, spi_master_handle_t *masterHandle, status_t
         case ModulePhase_ProcessDeltaX: ;
             int8_t deltaX = (int8_t)rxBuffer[1];
             PointerDelta.y += deltaX; // This is correct given the sensor orientation.
-            tx(txBufferGetSQUAL);
-            modulePhase = ModulePhase_ProcessSqual;
+            if(takeSqual) {
+                tx(txBufferGetSQUAL);
+                modulePhase = ModulePhase_ProcessSqual;
+            } else {
+                schedulePixgrabMaybe(false);
+            }
             break;
         case ModulePhase_ProcessSqual: ;
             uint8_t squal = (uint8_t)rxBuffer[1];
@@ -142,18 +168,12 @@ void trackballUpdate(SPI_Type *base, spi_master_handle_t *masterHandle, status_t
         case ModulePhase_ProcessShutterLower: ;
 			uint16_t shutterLower = (uint8_t)rxBuffer[1];
 			PointerDelta.shutter = (PointerDelta.shutter & 0xFF00) + shutterLower;
-            tx(txBufferGetMotion);
-            modulePhase = ModulePhase_ProcessMotion;
-/*
-            //modulePhase = ModulePhase_ProcessPixelGrab;
+            schedulePixgrabMaybe(true);
             break;
-        case ModulePhase_ProcessPixelGrab: ;
-        	uint8_t val = (uint8_t)rxBuffer[1];
-        	PointerDelta.shutter = (PointerDelta.shutter & 0x00FF) + (shutterUpper << 8);
-            tx(txBufferGetMotion);
-            modulePhase = ModulePhase_ProcessMotion;
+        case ModulePhase_ProcessPixgrab: ;
+            processPixgrab();
+            schedulePixgrabMaybe(false);
             break;
-            */
     }
 }
 

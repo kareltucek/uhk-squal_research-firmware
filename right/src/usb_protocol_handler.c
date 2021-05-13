@@ -19,6 +19,7 @@
 #include "usb_commands/usb_command_switch_keymap.h"
 #include "usb_commands/usb_command_get_variable.h"
 #include "usb_commands/usb_command_set_variable.h"
+#include "usb_commands/usb_command_get_pixgrab.h"
 
 void UsbProtocolHandler(void)
 {
@@ -81,6 +82,9 @@ void UsbProtocolHandler(void)
             break;
         case UsbCommandId_GetVariable:
             UsbCommand_GetVariable();
+            break;
+        case UsbCommandId_GetPixgrab:
+            UsbCommand_GetPixgrab();
             break;
         case UsbCommandId_SetVariable:
             UsbCommand_SetVariable();

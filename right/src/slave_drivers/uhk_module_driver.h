@@ -92,6 +92,8 @@
     } uhk_module_i2c_addresses_t;
 
 // Variables:
+    extern uint8_t PG_lastRegion;
+    extern uint8_t PG_buffer[PG_REGION_SIZE*PG_REGION_COUNT];
 
     extern uhk_module_state_t UhkModuleStates[UHK_MODULE_MAX_SLOT_COUNT];
 
