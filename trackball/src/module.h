@@ -30,6 +30,11 @@
     extern key_vector_t keyVector;
     extern pointer_delta_t PointerDelta;
 
+    extern const bool PG_enabled;
+    extern uint8_t PG_regionBuffer[PG_REGION_SIZE];
+    extern uint8_t PG_regionIdx;
+    extern uint8_t PG_inRegionIdx;
+
 // Functions:
 
     void Module_Init(void);

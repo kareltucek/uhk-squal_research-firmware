@@ -107,6 +107,17 @@ void SlaveTxHandler(void)
                 PointerDelta.maxY = 0;
                 PointerDelta.x = 0;
                 PointerDelta.y = 0;
+                if(PG_inRegionIdx == PG_REGION_SIZE) {
+                    pointerDelta->pgValid = true;
+                    pointerDelta->pgRegionIdx = PG_regionIdx;
+                    memcpy(pointerDelta->pgRegion, PG_regionBuffer, PG_REGION_SIZE);
+
+                    PG_regionIdx = (PG_regionIdx + 1) % PG_REGION_COUNT;
+                    PG_inRegionIdx = 0;
+
+                } else {
+                    pointerDelta->pgValid = false;
+                }
                 messageLength += sizeof(pointer_delta_t);
             }
             TxMessage.length = messageLength;

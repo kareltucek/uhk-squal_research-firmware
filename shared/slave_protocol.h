@@ -15,6 +15,9 @@
     #define SLAVE_SYNC_STRING "SYNC"
     #define SLAVE_SYNC_STRING_LENGTH (sizeof(SLAVE_SYNC_STRING) - 1)
 
+#define PG_REGION_SIZE 21
+#define PG_REGION_COUNT 22
+
 // Typedefs:
 
     typedef enum {
@@ -62,6 +65,10 @@
         uint8_t squal;
         uint16_t shutter;
         uint8_t maxY;
+        //8 B so far
+        bool pgValid;
+        uint8_t pgRegionIdx;
+        uint8_t pgRegion[PG_REGION_SIZE];
     } ATTR_PACKED pointer_delta_t;
 
 // Variables:

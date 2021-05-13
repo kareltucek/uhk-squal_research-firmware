@@ -9,6 +9,8 @@
 #include "key_states.h"
 
 uhk_module_state_t UhkModuleStates[UHK_MODULE_MAX_SLOT_COUNT];
+uint8_t PG_buffer[PG_REGION_SIZE*PG_REGION_COUNT];
+uint8_t PG_lastRegion;
 
 uint8_t UhkModuleSlaveDriver_SlotIdToDriverId(uint8_t slotId)
 {
@@ -248,6 +250,11 @@ status_t UhkModuleSlaveDriver_Update(uint8_t uhkModuleDriverId)
                     uhkModuleState->pointerDelta.squal = pointerDelta->squal;
                     uhkModuleState->pointerDelta.shutter = pointerDelta->shutter;
                     uhkModuleState->pointerDelta.maxY = pointerDelta->maxY;
+
+                    if(uhkModuleState->pointerDelta.pgValid) {
+                        PG_lastRegion = uhkModuleState->pointerDelta.pgRegionIdx;
+                        memcpy(PG_buffer + PG_lastRegion*PG_REGION_SIZE, uhkModuleState->pointerDelta.pgRegion, PG_REGION_SIZE);
+                    }
                 }
             }
             status = kStatus_Uhk_IdleCycle;
