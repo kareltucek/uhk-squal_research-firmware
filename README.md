@@ -1,3 +1,14 @@
+## Fork info
+
+This fork serves for research around trackball module and its pickup quality.
+
+When you flash this firmware, you can:
+
+- press `~` or `1` to see current squal (surface quality) value - i.e., number of recognized features of the surface (`1` picks minimum over the shown interval)
+- press `2` to see shutter interval - shutter interval is automatically adjusted by the sensor depending on lighting conditions. Lower shutter should correspond to better pickup.
+- press `3` to see quality rating computed as squal/shutter*1000.
+- use modified agent from neighbouring repository to get a fill image as picked up by the sensor.
+
 # Ultimate Hacking Keyboard firmware
 
 [![Build Status](https://travis-ci.org/UltimateHackingKeyboard/firmware.svg?branch=master)](https://travis-ci.org/UltimateHackingKeyboard/firmware)
