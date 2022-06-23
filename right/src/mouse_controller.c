@@ -214,7 +214,8 @@ static float computeModuleSpeed(float x, float y, uint8_t moduleId)
     }
 
     float normalizedSpeed = *currentSpeed/midSpeed;
-    return moduleConfiguration->baseSpeed + moduleConfiguration->speed*(float)pow(normalizedSpeed, moduleConfiguration->acceleration);
+    //return moduleConfiguration->baseSpeed + moduleConfiguration->speed*(float)pow(normalizedSpeed, moduleConfiguration->acceleration);
+    return 1.0f;
 }
 
 static void processTouchpadActions() {
@@ -284,6 +285,8 @@ void processModuleActions(uint8_t moduleId, float x, float y) {
 
 void MouseController_ProcessMouseActions()
 {
+    static uint32_t xSum = 0;
+    static uint32_t ySum = 0;
     mouseElapsedTime = Timer_GetElapsedTimeAndSetCurrent(&mouseUsbReportUpdateTime);
 
     processMouseKineticState(&MouseMoveState);
@@ -317,6 +320,11 @@ void MouseController_ProcessMouseActions()
             WATCH_VALUE(moduleState->pointerDelta.shutter, 2);
             WATCH_VALUE((int)moduleState->pointerDelta.squal * 1000 / moduleState->pointerDelta.shutter, 3);
             WATCH_VALUE_MAX(moduleState->pointerDelta.maxY, 4);
+
+            xSum += moduleState->pointerDelta.x;
+            ySum += moduleState->pointerDelta.y;
+            WATCH_VALUE(xSum, 5);
+            WATCH_VALUE(ySum, 6);
         }
 
         processModuleActions(moduleState->moduleId, (int16_t)moduleState->pointerDelta.x, (int16_t)moduleState->pointerDelta.y);
@@ -326,6 +334,8 @@ void MouseController_ProcessMouseActions()
 
     if (ActiveMouseStates[SerializedMouseAction_LeftClick]) {
         ActiveUsbMouseReport->buttons |= MouseButton_Left;
+        xSum = 0;
+        ySum = 0;
     }
     if (ActiveMouseStates[SerializedMouseAction_MiddleClick]) {
         ActiveUsbMouseReport->buttons |= MouseButton_Middle;
